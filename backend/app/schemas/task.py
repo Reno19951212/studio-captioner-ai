@@ -8,7 +8,8 @@ from pydantic import BaseModel
 
 class TaskCreate(BaseModel):
     video_path: str
-    asr_model: str = "faster_whisper"
+    asr_model: str = "whisper_cpp"
+    whisper_model: str = "base"
     config: dict = {}
 
 

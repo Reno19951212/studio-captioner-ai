@@ -40,7 +40,7 @@ async def create_task(
         user_id=user.id,
         video_path=body.video_path,
         status="queued",
-        config_json=json.dumps({"asr_model": body.asr_model, **body.config}),
+        config_json=json.dumps({"asr_model": body.asr_model, "whisper_model": body.whisper_model, **body.config}),
     )
     db.add(task)
     await db.commit()

@@ -76,9 +76,15 @@ async def run_pipeline(task_id: int, progress_callback: Optional[Callable] = Non
             if asr_model == "whisper_cpp"
             else TranscribeModelEnum.FASTER_WHISPER
         )
+
+        # Map whisper model name to enum
+        whisper_model_name = config.get("whisper_model", "base")
+        whisper_model_map = {e.value: e for e in WhisperModelEnum}
+        whisper_model_enum = whisper_model_map.get(whisper_model_name, WhisperModelEnum.BASE)
+
         transcribe_config = TranscribeConfig(
             transcribe_model=model_enum,
-            whisper_model=WhisperModelEnum.BASE,
+            whisper_model=whisper_model_enum,
             transcribe_language="en",
         )
 

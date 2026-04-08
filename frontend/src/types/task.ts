@@ -15,6 +15,7 @@ export interface Task {
 export interface TaskCreate {
   video_path: string;
   asr_model?: string;
+  whisper_model?: string;
   config?: Record<string, unknown>;
 }
 

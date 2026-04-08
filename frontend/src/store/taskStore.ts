@@ -8,7 +8,7 @@ interface TaskState {
   loading: boolean;
   fetchTasks: () => Promise<void>;
   fetchQueue: () => Promise<void>;
-  createTask: (videoPath: string, asrModel?: string) => Promise<Task>;
+  createTask: (videoPath: string, asrModel?: string, whisperModel?: string) => Promise<Task>;
   deleteTask: (id: number) => Promise<void>;
   updateTaskFromWs: (taskId: number, data: Partial<Task>) => void;
   updateQueueFromWs: (data: QueueStatus) => void;
@@ -18,8 +18,8 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   tasks: [], queueStatus: null, loading: false,
   fetchTasks: async () => { set({ loading: true }); const r = await tasks.list(); set({ tasks: r, loading: false }); },
   fetchQueue: async () => { const r = await tasks.queue(); set({ queueStatus: r }); },
-  createTask: async (videoPath, asrModel = "faster_whisper") => {
-    const task = await tasks.create({ video_path: videoPath, asr_model: asrModel });
+  createTask: async (videoPath, asrModel = "whisper_cpp", whisperModel = "base") => {
+    const task = await tasks.create({ video_path: videoPath, asr_model: asrModel, whisper_model: whisperModel });
     set({ tasks: [task, ...get().tasks] }); return task;
   },
   deleteTask: async (id) => { await tasks.delete(id); set({ tasks: get().tasks.filter((t) => t.id !== id) }); },

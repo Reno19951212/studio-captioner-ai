@@ -44,7 +44,19 @@ async def update_settings(body: SettingsUpdate, user: User = Depends(get_current
 
 @router.get("/models", response_model=AvailableModels)
 async def get_available_models(user: User = Depends(get_current_user)):
+    import os
+    from pathlib import Path
+    from core.config import MODEL_PATH
+
+    # Detect downloaded whisper models by scanning model files
+    all_sizes = ["tiny", "base", "small", "medium", "large-v1", "large-v2", "large-v3"]
+    available = []
+    for size in all_sizes:
+        matches = list(Path(MODEL_PATH).glob(f"*ggml*{size}*"))
+        if matches:
+            available.append(size)
+
     return AvailableModels(
-        asr_models=["faster_whisper", "whisper_cpp"],
-        whisper_sizes=["tiny", "base", "small", "medium", "large-v2", "large-v3"],
+        asr_models=["whisper_cpp"],
+        whisper_sizes=available if available else ["base"],
     )
