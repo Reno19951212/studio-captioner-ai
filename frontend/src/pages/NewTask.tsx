@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTaskStore } from "../store/taskStore";
 import { useSettingsStore } from "../store/settingsStore";
-import { glossaries as glossaryApi } from "../services/api";
+import { glossaries as glossaryApi, settings as settingsApi } from "../services/api";
 import type { Glossary } from "../types/glossary";
 
 const WHISPER_MODEL_LABELS: Record<string, string> = {
@@ -43,14 +43,18 @@ export function NewTask() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!videoPath.trim()) {
-      setError("Please enter a video path");
-      return;
-    }
+    const path = videoPath.trim();
+    if (!path) { setError("Please enter a video path"); return; }
+
     setError("");
     setSubmitting(true);
     try {
-      await createTask(videoPath.trim(), asrModel, whisperModel);
+      // Validate path exists on server before queuing
+      const { exists, readable } = await settingsApi.validatePath(path);
+      if (!exists) { setError(`File not found on server: ${path}`); setSubmitting(false); return; }
+      if (!readable) { setError(`File is not readable: ${path}`); setSubmitting(false); return; }
+
+      await createTask(path, asrModel, whisperModel);
       navigate("/");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to create task");

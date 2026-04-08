@@ -3,28 +3,48 @@ import { connectQueueWs, connectTaskWs } from "../services/ws";
 import { useTaskStore } from "../store/taskStore";
 import type { QueueStatus, Task } from "../types/task";
 
-/** Queue WebSocket with auto-reconnect (exponential backoff up to 30s). */
+/** Queue WebSocket with auto-reconnect + full task status updates. */
 export function useQueueWebSocket() {
   const wsRef = useRef<WebSocket | null>(null);
   const retryRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const delay = useRef(1000);
   const unmounted = useRef(false);
 
-  const updateQueueFromWs = useTaskStore((s) => s.updateQueueFromWs);
-  const updateTaskFromWs = useTaskStore((s) => s.updateTaskFromWs);
+  const { updateQueueFromWs, updateTaskFromWs, fetchTasks } = useTaskStore();
 
   const connect = useCallback(() => {
     if (unmounted.current) return;
 
     const ws = connectQueueWs((data) => {
-      // Queue status update
-      if ("queue_length" in data) {
-        updateQueueFromWs(data as unknown as QueueStatus);
+      const d = data as Record<string, unknown>;
+
+      // Queue-level update from backend broadcast
+      if (d.type === "task_update" && d.task) {
+        const t = d.task as { task_id: number; stage: string; progress: number; status: string };
+        // Update the task's status + stage + progress in the store
+        updateTaskFromWs(t.task_id, {
+          stage: t.stage,
+          progress: t.progress,
+          status: t.status as Task["status"],
+        } as Partial<Task>);
+
+        // When a task completes or fails, re-fetch full list so Dashboard is accurate
+        if (t.status === "ready_for_review" || t.status === "completed" || t.status === "failed") {
+          fetchTasks();
+        }
       }
-      // Task progress update
-      if ("task_id" in data) {
-        const { task_id, stage, progress } = data as { task_id: number; stage: string; progress: number };
-        updateTaskFromWs(task_id, { stage, progress } as Partial<Task>);
+
+      // Legacy queue status message
+      if ("queue_length" in d && !("type" in d)) {
+        updateQueueFromWs(d as unknown as QueueStatus);
+      }
+
+      // Also update queue count
+      if ("queue_length" in d && "current_task" in d) {
+        updateQueueFromWs({
+          queue_length: d.queue_length as number,
+          current_task: d.current_task as Task | null,
+        });
       }
     });
 
@@ -38,7 +58,7 @@ export function useQueueWebSocket() {
     };
 
     wsRef.current = ws;
-  }, [updateQueueFromWs, updateTaskFromWs]);
+  }, [updateQueueFromWs, updateTaskFromWs, fetchTasks]);
 
   useEffect(() => {
     unmounted.current = false;
@@ -53,19 +73,25 @@ export function useQueueWebSocket() {
   return wsRef;
 }
 
-/** Task-specific WebSocket — subscribes to a single task's progress. */
+/** Task-specific WebSocket with full status updates. */
 export function useTaskWebSocket(taskId: number) {
-  const updateTaskFromWs = useTaskStore((s) => s.updateTaskFromWs);
+  const { updateTaskFromWs, fetchTasks } = useTaskStore();
 
   useEffect(() => {
     const ws = connectTaskWs(taskId, (data) => {
-      if ("stage" in data && "progress" in data) {
+      const d = data as Record<string, unknown>;
+      if ("stage" in d && "progress" in d) {
         updateTaskFromWs(taskId, {
-          stage: data.stage as string,
-          progress: data.progress as number,
+          stage: d.stage as string,
+          progress: d.progress as number,
+          status: (d.status ?? "processing") as Task["status"],
         } as Partial<Task>);
+
+        if (d.status === "ready_for_review" || d.status === "completed" || d.status === "failed") {
+          fetchTasks();
+        }
       }
     });
     return () => ws.close();
-  }, [taskId, updateTaskFromWs]);
+  }, [taskId, updateTaskFromWs, fetchTasks]);
 }

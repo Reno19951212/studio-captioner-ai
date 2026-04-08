@@ -44,18 +44,39 @@ export function SubtitleList() {
               </div>
             </div>
             {isSelected ? (
-              <textarea value={seg.text} onChange={(e) => updateSegment(i, { text: e.target.value })}
-                className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-zinc-200 text-sm resize-none mb-1"
-                rows={2} onClick={(e) => e.stopPropagation()} />
+              <textarea
+                value={seg.text}
+                onChange={(e) => updateSegment(i, { text: e.target.value })}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") { e.preventDefault(); selectSegment(null); }
+                  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); selectSegment(i + 1 < segments.length ? i + 1 : null); }
+                }}
+                className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-zinc-200 text-sm resize-none mb-1 focus:border-blue-500 focus:outline-none"
+                rows={2}
+                autoFocus
+                onClick={(e) => e.stopPropagation()}
+                placeholder="Source text…"
+              />
             ) : (
-              <div className="text-zinc-200 mb-1">{seg.text}</div>
+              <div className="text-zinc-200 mb-1 text-sm">{seg.text || <span className="text-zinc-600 italic">empty</span>}</div>
             )}
             {isSelected ? (
-              <textarea value={seg.translated_text || ""} onChange={(e) => updateSegment(i, { translated_text: e.target.value })}
-                className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-blue-400 text-sm resize-none"
-                rows={2} placeholder="Translation..." onClick={(e) => e.stopPropagation()} />
+              <textarea
+                value={seg.translated_text || ""}
+                onChange={(e) => updateSegment(i, { translated_text: e.target.value })}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") { e.preventDefault(); selectSegment(null); }
+                  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); selectSegment(i + 1 < segments.length ? i + 1 : null); }
+                }}
+                className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-blue-400 text-sm resize-none focus:border-blue-500 focus:outline-none"
+                rows={2}
+                placeholder="Translation… (Enter = next, Shift+Enter = new line, Esc = close)"
+                onClick={(e) => e.stopPropagation()}
+              />
             ) : (
-              seg.translated_text && <div className={isLowConfidence ? "text-red-400" : "text-blue-400"}>{seg.translated_text}</div>
+              <div className={`text-sm ${isLowConfidence ? "text-red-400" : "text-blue-400"}`}>
+                {seg.translated_text || <span className="text-zinc-600 italic">no translation</span>}
+              </div>
             )}
           </div>
         );

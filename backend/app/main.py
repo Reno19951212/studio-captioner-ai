@@ -22,11 +22,28 @@ async def queue_worker():
 
     async def progress_callback(task_id: int, stage: str, progress: int, detail: str):
         """Broadcast pipeline progress to WebSocket subscribers."""
-        await progress_manager.broadcast_task(task_id, {
-            "stage": stage, "progress": progress, "detail": detail,
-        })
+        # Determine status from stage
+        if stage == "done":
+            status = "ready_for_review"
+        elif stage == "failed":
+            status = "failed"
+        else:
+            status = "processing"
+
+        task_msg = {
+            "task_id": task_id,
+            "stage": stage,
+            "progress": progress,
+            "detail": detail,
+            "status": status,
+        }
+        # Broadcast to task-specific subscribers
+        await progress_manager.broadcast_task(task_id, task_msg)
+        # Broadcast to queue-wide subscribers (Dashboard)
         await progress_manager.broadcast_queue({
+            "type": "task_update",
             "queue_length": task_queue.length,
+            "task": task_msg,
             "current_task": {
                 "id": task_id, "stage": stage, "progress": progress,
             } if task_queue.current_task_id else None,

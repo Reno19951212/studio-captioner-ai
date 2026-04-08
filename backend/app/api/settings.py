@@ -60,3 +60,12 @@ async def get_available_models(user: User = Depends(get_current_user)):
         asr_models=["whisper_cpp"],
         whisper_sizes=available if available else ["base"],
     )
+
+
+@router.get("/validate-path")
+async def validate_path(path: str, user: User = Depends(get_current_user)):
+    """Check whether a file path exists on the server."""
+    import os
+    exists = os.path.isfile(path)
+    readable = os.access(path, os.R_OK) if exists else False
+    return {"exists": exists, "readable": readable, "path": path}

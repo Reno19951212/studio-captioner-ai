@@ -86,6 +86,10 @@ export const settings = {
   update: (data: Partial<Settings>) =>
     request<Settings>("/api/settings", { method: "PUT", body: JSON.stringify(data) }),
   models: () => request<AvailableModels>("/api/settings/models"),
+  validatePath: (path: string) =>
+    request<{ exists: boolean; readable: boolean; path: string }>(
+      `/api/settings/validate-path?path=${encodeURIComponent(path)}`
+    ),
 };
 
 export const preview = {

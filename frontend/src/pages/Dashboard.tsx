@@ -10,12 +10,20 @@ export function Dashboard() {
   const navigate = useNavigate();
   useQueueWebSocket();
 
-  useEffect(() => { fetchTasks(); fetchQueue(); }, [fetchTasks, fetchQueue]);
+  useEffect(() => {
+    fetchTasks();
+    fetchQueue();
+
+    // 30s polling fallback — keeps Dashboard accurate if WS misses a transition
+    const interval = setInterval(() => { fetchTasks(); fetchQueue(); }, 30_000);
+    return () => clearInterval(interval);
+  }, [fetchTasks, fetchQueue]);
 
   const queued = tasks.filter((t) => t.status === "queued");
   const processing = tasks.filter((t) => t.status === "processing");
   const review = tasks.filter((t) => t.status === "ready_for_review");
   const completed = tasks.filter((t) => t.status === "completed");
+  const failed = tasks.filter((t) => t.status === "failed");
 
   const handleTaskClick = (task: Task) => {
     if (task.status === "ready_for_review" || task.status === "completed") {
@@ -26,6 +34,8 @@ export function Dashboard() {
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
+
+      {/* Status cards */}
       <div className="grid grid-cols-4 gap-4 mb-6">
         <div className="bg-emerald-500/10 rounded-lg p-4 text-center">
           <div className="text-3xl font-bold text-emerald-400">{processing.length}</div>
@@ -35,7 +45,7 @@ export function Dashboard() {
           <div className="text-3xl font-bold text-amber-400">{queued.length}</div>
           <div className="text-xs text-zinc-500 mt-1">In Queue</div>
         </div>
-        <div className="bg-pink-500/10 rounded-lg p-4 text-center">
+        <div className="bg-pink-500/10 rounded-lg p-4 text-center cursor-pointer" onClick={() => review.length && handleTaskClick(review[0])}>
           <div className="text-3xl font-bold text-pink-400">{review.length}</div>
           <div className="text-xs text-zinc-500 mt-1">Needs Review</div>
         </div>
@@ -44,9 +54,34 @@ export function Dashboard() {
           <div className="text-xs text-zinc-500 mt-1">Completed</div>
         </div>
       </div>
-      {processing.length > 0 && <section className="mb-6"><h2 className="text-sm font-medium text-zinc-400 mb-2">Processing</h2><QueueList tasks={processing} /></section>}
-      {queued.length > 0 && <section className="mb-6"><h2 className="text-sm font-medium text-zinc-400 mb-2">Queue</h2><QueueList tasks={queued} /></section>}
-      {review.length > 0 && <section><h2 className="text-sm font-medium text-zinc-400 mb-2">Needs Review</h2><QueueList tasks={review} onTaskClick={handleTaskClick} /></section>}
+
+      {processing.length > 0 && (
+        <section className="mb-6">
+          <h2 className="text-sm font-medium text-zinc-400 mb-2">Processing</h2>
+          <QueueList tasks={processing} />
+        </section>
+      )}
+      {queued.length > 0 && (
+        <section className="mb-6">
+          <h2 className="text-sm font-medium text-zinc-400 mb-2">Queue</h2>
+          <QueueList tasks={queued} />
+        </section>
+      )}
+      {review.length > 0 && (
+        <section className="mb-6">
+          <h2 className="text-sm font-medium text-zinc-400 mb-2">
+            Needs Review
+            <span className="ml-2 text-xs text-zinc-500">Click to open editor</span>
+          </h2>
+          <QueueList tasks={review} onTaskClick={handleTaskClick} />
+        </section>
+      )}
+      {failed.length > 0 && (
+        <section>
+          <h2 className="text-sm font-medium text-red-500 mb-2">Failed</h2>
+          <QueueList tasks={failed} />
+        </section>
+      )}
     </div>
   );
 }
