@@ -44,6 +44,7 @@ include = ["core", "app", "features"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-v --strict-markers --tb=short"
+asyncio_mode = "auto"
 
 [tool.ruff]
 line-length = 100
