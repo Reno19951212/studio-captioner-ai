@@ -90,6 +90,49 @@ async def run_pipeline(task_id: int, progress_callback: Optional[Callable] = Non
 
         asr_data = transcribe(audio_path, transcribe_config)
 
+        await update_task_status(task_id, "processing", stage="translate", progress=50)
+        if progress_callback:
+            await progress_callback(task_id, "translate", 50, "Translating to Traditional Chinese")
+
+        # --- Translation stage ---
+        from app.config import settings as app_settings
+        from core.llm.client import get_llm_client
+        import openai
+
+        # Configure LLM client for translation
+        _client = openai.OpenAI(
+            api_key=app_settings.llm_api_key,
+            base_url=app_settings.llm_api_base,
+        )
+
+        # Translate each segment using direct LLM call (simpler than full translator class)
+        model = app_settings.llm_model
+        for seg in asr_data.segments:
+            if not seg.text.strip():
+                continue
+            try:
+                response = _client.chat.completions.create(
+                    model=model,
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": (
+                                "You are a professional subtitle translator. "
+                                "Translate the given English text to Traditional Chinese (繁體中文). "
+                                "Return ONLY the translated text, no explanations, no punctuation changes beyond what is natural."
+                            ),
+                        },
+                        {"role": "user", "content": seg.text},
+                    ],
+                    temperature=0.3,
+                )
+                seg.translated_text = response.choices[0].message.content.strip()
+            except Exception as translate_err:
+                # If translation fails for a segment, leave it empty and continue
+                seg.translated_text = ""
+
+        await update_task_status(task_id, "processing", stage="translate", progress=90)
+
         subtitle_dir = os.path.dirname(video_path)
         base_name = os.path.splitext(os.path.basename(video_path))[0]
         subtitle_path = os.path.join(subtitle_dir, f"{base_name}.srt")
