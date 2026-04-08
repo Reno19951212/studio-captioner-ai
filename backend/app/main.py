@@ -18,11 +18,25 @@ task_queue = TaskQueue()
 
 async def queue_worker():
     from app.services.pipeline import run_pipeline
+    from app.ws.handlers import progress_manager
+
+    async def progress_callback(task_id: int, stage: str, progress: int, detail: str):
+        """Broadcast pipeline progress to WebSocket subscribers."""
+        await progress_manager.broadcast_task(task_id, {
+            "stage": stage, "progress": progress, "detail": detail,
+        })
+        await progress_manager.broadcast_queue({
+            "queue_length": task_queue.length,
+            "current_task": {
+                "id": task_id, "stage": stage, "progress": progress,
+            } if task_queue.current_task_id else None,
+        })
+
     while True:
         task_id = await task_queue.dequeue()
         task_queue.current_task_id = task_id
         try:
-            await run_pipeline(task_id)
+            await run_pipeline(task_id, progress_callback=progress_callback)
         except Exception:
             pass
         finally:

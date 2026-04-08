@@ -157,3 +157,77 @@ async def export_subtitles(
         raise HTTPException(status_code=400, detail=f"Unsupported format: {fmt}")
 
     return FileResponse(out_path, filename=os.path.basename(out_path))
+
+
+class SynthesizeRequest(BaseModel):
+    output_format: str = "mp4"  # mp4, mxf
+    quality: str = "medium"     # ultra, high, medium, low
+
+
+@router.post("/api/tasks/{task_id}/synthesize")
+async def synthesize_video(
+    task_id: int,
+    body: SynthesizeRequest,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Burn subtitles into the video and save the output."""
+    import subprocess
+    task = await _get_user_task(task_id, user, db)
+    if not task.subtitle_path or not os.path.exists(task.subtitle_path):
+        raise HTTPException(status_code=404, detail="No subtitle data — run transcription first")
+    if not task.video_path or not os.path.exists(task.video_path):
+        raise HTTPException(status_code=404, detail="Source video not found")
+
+    base_name = os.path.splitext(os.path.basename(task.video_path))[0]
+    out_dir = os.path.dirname(task.video_path)
+    fmt = body.output_format.lower()
+
+    quality_crf = {"ultra": "18", "high": "23", "medium": "28", "low": "32"}.get(body.quality, "28")
+    out_path = os.path.join(out_dir, f"{base_name}_captioned.{fmt}")
+
+    # Build FFmpeg command — hard-burn the SRT subtitles
+    subtitle_filter = f"subtitles={task.subtitle_path.replace(':', r'\\:')}"
+    if fmt == "mp4":
+        cmd = [
+            "ffmpeg", "-y", "-i", task.video_path,
+            "-vf", subtitle_filter,
+            "-c:v", "libx264", "-crf", quality_crf, "-preset", "medium",
+            "-c:a", "aac", "-b:a", "192k",
+            out_path,
+        ]
+    elif fmt == "mxf":
+        cmd = [
+            "ffmpeg", "-y", "-i", task.video_path,
+            "-vf", subtitle_filter,
+            "-c:v", "dnxhd", "-b:v", "120M",
+            "-c:a", "pcm_s16le",
+            out_path,
+        ]
+    else:
+        raise HTTPException(status_code=400, detail=f"Unsupported format: {fmt}")
+
+    try:
+        result = subprocess.run(cmd, capture_output=True, timeout=1800)
+        if result.returncode != 0:
+            raise HTTPException(
+                status_code=500,
+                detail=f"FFmpeg failed: {result.stderr.decode()[-500:]}"
+            )
+    except subprocess.TimeoutExpired:
+        raise HTTPException(status_code=500, detail="Synthesis timed out (30 min limit)")
+
+    # Update task output path
+    from sqlalchemy import select
+    from sqlalchemy.ext.asyncio import AsyncSession as AS
+    from app.database import async_session
+    async with async_session() as sess:
+        from app.models.task import Task as TaskModel
+        result_db = await sess.execute(select(TaskModel).where(TaskModel.id == task_id))
+        t = result_db.scalar_one_or_none()
+        if t:
+            t.output_path = out_path
+            t.status = "completed"
+            await sess.commit()
+
+    return {"output_path": out_path, "detail": "Synthesis complete"}

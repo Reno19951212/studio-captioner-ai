@@ -38,11 +38,28 @@ export function Editor() {
     }
   };
 
+  const handleSynthesize = async (format: string, quality: string) => {
+    if (!taskId) return;
+    const token = localStorage.getItem("token");
+    const resp = await fetch(`http://localhost:8000/api/tasks/${taskId}/synthesize`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ output_format: format, quality }),
+    });
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.detail || "Synthesis failed");
+    }
+  };
+
   if (!taskId) return <p className="text-zinc-500">Invalid task ID</p>;
 
   return (
     <div className="flex flex-col h-full -m-6">
-      <EditorToolbar onExport={handleExport} />
+      <EditorToolbar onExport={handleExport} onSynthesize={handleSynthesize} />
       <div className="flex flex-1 min-h-0">
         <div className="flex-1 min-w-0">
           <VideoPlayer taskId={taskId} />

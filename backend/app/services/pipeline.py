@@ -107,6 +107,8 @@ async def run_pipeline(task_id: int, progress_callback: Optional[Callable] = Non
 
         # Translate each segment using direct LLM call (simpler than full translator class)
         model = app_settings.llm_model
+        total_segs = len([s for s in asr_data.segments if s.text.strip()])
+        done_segs = 0
         for seg in asr_data.segments:
             if not seg.text.strip():
                 continue
@@ -131,9 +133,13 @@ async def run_pipeline(task_id: int, progress_callback: Optional[Callable] = Non
                     temperature=0.3,
                 )
                 seg.translated_text = response.choices[0].message.content.strip()
-            except Exception as translate_err:
-                # If translation fails for a segment, leave it empty and continue
+            except Exception:
                 seg.translated_text = ""
+            done_segs += 1
+            translate_pct = 50 + int(done_segs / total_segs * 40) if total_segs else 90
+            await update_task_status(task_id, "processing", stage="translate", progress=translate_pct)
+            if progress_callback:
+                await progress_callback(task_id, "translate", translate_pct, f"Translated {done_segs}/{total_segs}")
 
         await update_task_status(task_id, "processing", stage="translate", progress=90)
 
