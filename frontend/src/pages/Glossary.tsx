@@ -9,6 +9,7 @@ export function GlossaryPage() {
   const [newName, setNewName] = useState("");
   const [newSource, setNewSource] = useState("");
   const [newTarget, setNewTarget] = useState("");
+  const [search, setSearch] = useState("");
 
   useEffect(() => { api.list().then(setList); }, []);
 
@@ -60,23 +61,33 @@ export function GlossaryPage() {
                 <a href={api.exportUrl(selected.id)} target="_blank" className="bg-zinc-800 px-3 py-1 rounded text-sm hover:bg-zinc-700">Export CSV</a>
               </div>
             </div>
-            <div className="flex gap-2 mb-4">
+            <div className="flex gap-2 mb-3">
               <input value={newSource} onChange={(e) => setNewSource(e.target.value)} placeholder="English term"
-                className="flex-1 bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-sm text-zinc-100" />
+                className="flex-1 bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-sm text-zinc-100 focus:outline-none focus:border-blue-500" />
               <input value={newTarget} onChange={(e) => setNewTarget(e.target.value)} placeholder="Chinese translation"
-                className="flex-1 bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-sm text-zinc-100"
+                className="flex-1 bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-sm text-zinc-100 focus:outline-none focus:border-blue-500"
                 onKeyDown={(e) => e.key === "Enter" && addEntry()} />
-              <button onClick={addEntry} className="bg-blue-600 px-3 py-1 rounded text-sm">Add</button>
+              <button onClick={addEntry} className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm">Add</button>
             </div>
+            {entries.length > 5 && (
+              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search terms…"
+                className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-sm text-zinc-100 mb-3 focus:outline-none focus:border-blue-500" />
+            )}
             <div className="space-y-1">
-              {entries.map((entry) => (
-                <div key={entry.id} className="flex gap-4 bg-zinc-900 rounded px-3 py-2 text-sm">
-                  <span className="flex-1 text-zinc-200">{entry.source_term}</span>
-                  <span className="flex-1 text-blue-400">{entry.target_term}</span>
-                </div>
-              ))}
-              {entries.length === 0 && <p className="text-zinc-600 text-sm">No entries yet</p>}
+              {entries
+                .filter((e) => !search || e.source_term.toLowerCase().includes(search.toLowerCase()) || e.target_term.includes(search))
+                .map((entry) => (
+                  <div key={entry.id} className="flex gap-4 bg-zinc-900 rounded px-3 py-2 text-sm hover:bg-zinc-800">
+                    <span className="flex-1 text-zinc-200">{entry.source_term}</span>
+                    <span className="flex-1 text-blue-400">{entry.target_term}</span>
+                  </div>
+                ))}
+              {entries.length === 0 && <p className="text-zinc-600 text-sm">No entries yet. Add terms above.</p>}
+              {entries.length > 0 && search && entries.filter((e) => e.source_term.toLowerCase().includes(search.toLowerCase()) || e.target_term.includes(search)).length === 0 && (
+                <p className="text-zinc-600 text-sm">No matching terms for "{search}"</p>
+              )}
             </div>
+            <div className="text-xs text-zinc-600 mt-2">{entries.length} terms total</div>
           </>
         ) : <p className="text-zinc-600">Select a glossary to view entries</p>}
       </div>

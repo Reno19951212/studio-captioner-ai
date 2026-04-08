@@ -6,14 +6,25 @@ interface VideoPlayerProps { taskId: number; }
 
 export function VideoPlayer({ taskId }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const userSeeking = useRef(false); // true when user clicked subtitle → seek video
+
   const {
     segments, currentTime, isPlaying, selectedIndex,
-    setCurrentTime, setIsPlaying, getActiveSegmentIndex,
+    setCurrentTime, setIsPlaying, getActiveSegmentIndex, selectSegment,
     subtitleStyle: style,
   } = useEditorStore();
 
   const activeIndex = getActiveSegmentIndex();
   const activeSegment = activeIndex >= 0 ? segments[activeIndex] : null;
+
+  // Auto-select the segment matching current playback position
+  const prevActiveRef = useRef(-1);
+  useEffect(() => {
+    if (isPlaying && activeIndex !== prevActiveRef.current && activeIndex >= 0) {
+      prevActiveRef.current = activeIndex;
+      selectSegment(activeIndex);
+    }
+  }, [isPlaying, activeIndex, selectSegment]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -26,8 +37,13 @@ export function VideoPlayer({ taskId }: VideoPlayerProps) {
     const video = videoRef.current;
     if (!video || selectedIndex === null) return;
     const seg = segments[selectedIndex];
-    if (seg) video.currentTime = seg.start_time / 1000;
-  }, [selectedIndex, segments]);
+    // Only seek if this is a user-initiated selection (not from auto-sync during playback)
+    if (seg && !isPlaying) {
+      userSeeking.current = true;
+      video.currentTime = seg.start_time / 1000;
+      setTimeout(() => { userSeeking.current = false; }, 200);
+    }
+  }, [selectedIndex, segments, isPlaying]);
 
   const handleTimeUpdate = useCallback(() => {
     const video = videoRef.current;

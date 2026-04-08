@@ -15,7 +15,7 @@ type EditorTab = "subtitles" | "style";
 export function Editor() {
   const { taskId: taskIdParam } = useParams<{ taskId: string }>();
   const taskId = taskIdParam ? parseInt(taskIdParam, 10) : null;
-  const { loadSubtitles } = useEditorStore();
+  const { loadSubtitles, segments, selectedIndex } = useEditorStore();
   const [activeTab, setActiveTab] = useState<EditorTab>("subtitles");
 
   useEditorKeyboard();
@@ -69,10 +69,13 @@ export function Editor() {
           <VideoPlayer taskId={taskId} />
         </div>
         <div className="w-96 border-l border-zinc-800 flex flex-col">
-          <div className="flex border-b border-zinc-800 text-sm">
+          <div className="flex items-center border-b border-zinc-800 text-sm">
             <button onClick={() => setActiveTab("subtitles")}
               className={`px-4 py-2 ${activeTab === "subtitles" ? "text-blue-400 border-b-2 border-blue-400" : "text-zinc-500 hover:text-zinc-300"}`}>
               Subtitles
+              <span className="ml-1 text-xs text-zinc-600">
+                {selectedIndex !== null ? `${selectedIndex + 1}/${segments.length}` : segments.length}
+              </span>
             </button>
             <button onClick={() => setActiveTab("style")}
               className={`px-4 py-2 ${activeTab === "style" ? "text-blue-400 border-b-2 border-blue-400" : "text-zinc-500 hover:text-zinc-300"}`}>
