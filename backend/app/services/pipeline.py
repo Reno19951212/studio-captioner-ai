@@ -51,6 +51,10 @@ async def run_pipeline(task_id: int, progress_callback: Optional[Callable] = Non
             return
         config = json.loads(task.config_json) if task.config_json else {}
         video_path = task.video_path
+        # Strip file:// protocol if present (from browser drag-and-drop)
+        if video_path.startswith("file://"):
+            from urllib.parse import unquote, urlparse
+            video_path = unquote(urlparse(video_path).path)
 
     try:
         await update_task_status(task_id, "processing", stage="transcribe", progress=0)
@@ -64,20 +68,26 @@ async def run_pipeline(task_id: int, progress_callback: Optional[Callable] = Non
         audio_path = os.path.join(tempfile.gettempdir(), f"task_{task_id}.wav")
         video2audio(video_path, audio_path)
 
-        asr_model = config.get("asr_model", "faster_whisper")
+        from core.entities import WhisperModelEnum
+
+        asr_model = config.get("asr_model", "whisper_cpp")
         model_enum = (
-            TranscribeModelEnum.FASTER_WHISPER
-            if asr_model == "faster_whisper"
-            else TranscribeModelEnum.WHISPER_CPP
+            TranscribeModelEnum.WHISPER_CPP
+            if asr_model == "whisper_cpp"
+            else TranscribeModelEnum.FASTER_WHISPER
         )
-        transcribe_config = TranscribeConfig(transcribe_model=model_enum)
+        transcribe_config = TranscribeConfig(
+            transcribe_model=model_enum,
+            whisper_model=WhisperModelEnum.BASE,
+            transcribe_language="en",
+        )
 
         asr_data = transcribe(audio_path, transcribe_config)
 
         subtitle_dir = os.path.dirname(video_path)
         base_name = os.path.splitext(os.path.basename(video_path))[0]
         subtitle_path = os.path.join(subtitle_dir, f"{base_name}.srt")
-        asr_data.to_srt(subtitle_path)
+        asr_data.to_srt(save_path=subtitle_path)
 
         await update_task_status(
             task_id, "ready_for_review", stage="done", progress=100, subtitle_path=subtitle_path,

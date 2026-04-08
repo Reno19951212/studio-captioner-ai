@@ -11,8 +11,8 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expire_hours: int = 72
     storage_base_path: str = ""
-    default_asr_model: str = "faster_whisper"
-    default_whisper_model: str = "large-v3"
+    default_asr_model: str = "whisper_cpp"
+    default_whisper_model: str = "base"
     llm_api_base: str = "http://localhost:11434/v1"
     llm_api_key: str = "ollama"
     llm_model: str = "qwen2.5:7b"
