@@ -1,0 +1,54 @@
+[project]
+name = "studio-captioner-ai"
+version = "0.1.0"
+description = "AI-powered on-premise video captioning tool for studio teams"
+readme = "../README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10,<3.13"
+keywords = ["video", "caption", "subtitle", "asr", "llm", "translation"]
+
+dependencies = [
+    "requests>=2.32.4",
+    "openai>=1.97.1",
+    "diskcache>=5.6.3",
+    "json-repair>=0.49.0",
+    "langdetect>=1.0.9",
+    "pydub>=0.25.1",
+    "tenacity>=8.2.0",
+    "pillow>=12.0.0",
+    "fonttools>=4.61.1",
+    "platformdirs>=4.0.0",
+    "tomli>=2.0.0; python_version < '3.11'",
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.34.0",
+    "sqlalchemy>=2.0.0",
+    "pyjwt>=2.9.0",
+    "python-multipart>=0.0.18",
+]
+
+[project.urls]
+Repository = "https://github.com/Reno19951212/studio-captioner-ai"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["core", "app", "features"]
+
+[tool.pyright]
+pythonVersion = "3.12"
+typeCheckingMode = "basic"
+include = ["core", "app", "features"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --strict-markers --tb=short"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = ["E501"]

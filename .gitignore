@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+*.egg
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project
+*.log
+output/
+temp/
+.superpowers/
+
+# Node (frontend)
+node_modules/
+frontend/dist/
+
+# Tauri
+frontend/src-tauri/target/
