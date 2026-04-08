@@ -45,6 +45,8 @@ async def create_task(
     db.add(task)
     await db.commit()
     await db.refresh(task)
+    from app.main import task_queue
+    await task_queue.enqueue(task.id)
     return _task_to_response(task)
 
 
@@ -84,6 +86,8 @@ async def delete_task(
         raise HTTPException(status_code=404, detail="Task not found")
     if task.status != "queued":
         raise HTTPException(status_code=409, detail="Can only delete queued tasks")
+    from app.main import task_queue
+    task_queue.cancel(task_id)
     await db.delete(task)
     await db.commit()
     return {"detail": "Task deleted"}
