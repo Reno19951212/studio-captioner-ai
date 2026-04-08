@@ -2,7 +2,7 @@ import logging
 import logging.handlers
 from pathlib import Path
 
-from ...config import LOG_LEVEL, LOG_PATH
+from ..config import LOG_LEVEL, LOG_PATH
 
 
 def setup_logger(

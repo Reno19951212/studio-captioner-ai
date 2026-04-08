@@ -9,8 +9,6 @@ import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Callable, List, Optional, Tuple
 
-from pydub import AudioSegment
-
 from ..utils.logger import setup_logger
 from .asr_data import ASRData
 from .base import BaseASR
@@ -114,6 +112,8 @@ class ChunkedASR:
         # 从字节数据加载音频
         if self.file_binary is None:
             raise ValueError("file_binary is None, cannot split audio")
+
+        from pydub import AudioSegment  # lazy import to avoid audioop dependency at module level
 
         audio = AudioSegment.from_file(io.BytesIO(self.file_binary))
         total_duration_ms = len(audio)
