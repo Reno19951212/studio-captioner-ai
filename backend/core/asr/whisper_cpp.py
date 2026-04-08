@@ -8,9 +8,9 @@ import time
 from pathlib import Path
 from typing import Any, Callable, List, Optional, Union
 
-from ...config import MODEL_PATH
-from ..utils.logger import setup_logger
-from ..utils.subprocess_helper import StreamReader
+from core.config import MODEL_PATH
+from core.utils.logger import setup_logger
+from core.utils.subprocess_helper import StreamReader
 from .asr_data import ASRData, ASRDataSeg
 from .base import BaseASR
 from .status import ASRStatus
