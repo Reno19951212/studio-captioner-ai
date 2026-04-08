@@ -1,0 +1,104 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.14.3, pytest-9.0.2, pluggy-1.6.0 -- /opt/homebrew/opt/python@3.14/bin/python3.14
+cachedir: .pytest_cache
+rootdir: /Users/renomacm2/Documents/GitHub Remote Project/studio-captioner-ai/backend
+configfile: pyproject.toml
+plugins: anyio-4.12.1, asyncio-1.3.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 73 items
+
+tests/test_api/test_auth.py::test_register_user PASSED                   [  1%]
+tests/test_api/test_auth.py::test_register_duplicate_name PASSED         [  2%]
+tests/test_api/test_auth.py::test_login_success PASSED                   [  4%]
+tests/test_api/test_auth.py::test_login_wrong_password PASSED            [  5%]
+tests/test_api/test_auth.py::test_protected_endpoint_without_token PASSED [  6%]
+tests/test_api/test_auth.py::test_protected_endpoint_with_token PASSED   [  8%]
+tests/test_api/test_database.py::test_create_user PASSED                 [  9%]
+tests/test_api/test_database.py::test_unique_username PASSED             [ 10%]
+tests/test_api/test_health.py::test_health_endpoint PASSED               [ 12%]
+tests/test_api/test_path_resolver.py::test_resolve_client_to_server_path PASSED [ 13%]
+tests/test_api/test_path_resolver.py::test_resolve_server_to_client_path PASSED [ 15%]
+tests/test_api/test_path_resolver.py::test_server_local_path_unchanged PASSED [ 16%]
+tests/test_api/test_path_resolver.py::test_unknown_mount_raises PASSED   [ 17%]
+tests/test_api/test_preview.py::test_preview_video_streaming PASSED      [ 19%]
+tests/test_api/test_preview.py::test_preview_video_not_found PASSED      [ 20%]
+tests/test_api/test_queue.py::test_queue_enqueue_dequeue PASSED          [ 21%]
+tests/test_api/test_queue.py::test_queue_cancel PASSED                   [ 23%]
+tests/test_api/test_queue.py::test_queue_current_task PASSED             [ 24%]
+tests/test_api/test_settings.py::test_get_settings PASSED                [ 26%]
+tests/test_api/test_settings.py::test_get_available_models PASSED        [ 27%]
+tests/test_api/test_subtitles.py::test_get_subtitles PASSED              [ 28%]
+tests/test_api/test_subtitles.py::test_save_subtitles PASSED             [ 30%]
+tests/test_api/test_tasks.py::test_create_task PASSED                    [ 31%]
+tests/test_api/test_tasks.py::test_list_tasks PASSED                     [ 32%]
+tests/test_api/test_tasks.py::test_get_task PASSED                       [ 34%]
+tests/test_api/test_tasks.py::test_delete_queued_task PASSED             [ 35%]
+tests/test_api/test_tasks.py::test_get_queue_status PASSED               [ 36%]
+tests/test_api/test_websocket.py::test_progress_manager_subscribe_unsubscribe PASSED [ 38%]
+tests/test_core/test_imports.py::test_import_asr_module PASSED           [ 39%]
+tests/test_core/test_imports.py::test_import_asr_data PASSED             [ 41%]
+tests/test_core/test_imports.py::test_import_translate_module PASSED     [ 42%]
+tests/test_core/test_imports.py::test_translator_type_has_no_cloud_services PASSED [ 43%]
+tests/test_core/test_imports.py::test_transcribe_model_enum_has_no_cloud_services PASSED [ 45%]
+tests/test_core/test_imports.py::test_import_split_module PASSED         [ 46%]
+tests/test_core/test_imports.py::test_import_optimize_module PASSED      [ 47%]
+tests/test_core/test_imports.py::test_import_subtitle_module PASSED      [ 49%]
+tests/test_core/test_imports.py::test_import_llm_module PASSED           [ 50%]
+tests/test_core/test_imports.py::test_import_utils PASSED                [ 52%]
+tests/test_features/test_back_translation.py::TestCompareTexts::test_identical_texts PASSED [ 53%]
+tests/test_features/test_back_translation.py::TestCompareTexts::test_similar_texts PASSED [ 54%]
+tests/test_features/test_back_translation.py::TestCompareTexts::test_different_texts PASSED [ 56%]
+tests/test_features/test_back_translation.py::TestConfidenceScoring::test_compute_confidence PASSED [ 57%]
+tests/test_features/test_back_translation.py::TestConfidenceScoring::test_flag_low_confidence PASSED [ 58%]
+tests/test_features/test_back_translation.py::TestConfidenceScoring::test_flag_all_above_threshold PASSED [ 60%]
+tests/test_features/test_back_translation.py::TestConfidenceScoring::test_flag_empty PASSED [ 61%]
+tests/test_features/test_glossary.py::test_create_glossary PASSED        [ 63%]
+tests/test_features/test_glossary.py::test_add_entries PASSED            [ 64%]
+tests/test_features/test_glossary.py::test_delete_entry PASSED           [ 65%]
+tests/test_features/test_glossary.py::test_list_glossaries PASSED        [ 67%]
+tests/test_features/test_glossary.py::test_get_entries_as_dict PASSED    [ 68%]
+tests/test_features/test_glossary_api.py::test_create_glossary PASSED    [ 69%]
+tests/test_features/test_glossary_api.py::test_list_glossaries PASSED    [ 71%]
+tests/test_features/test_glossary_api.py::test_add_entries PASSED        [ 72%]
+tests/test_features/test_glossary_api.py::test_get_entries PASSED        [ 73%]
+tests/test_features/test_glossary_api.py::test_delete_glossary PASSED    [ 75%]
+tests/test_features/test_glossary_api.py::test_csv_import PASSED         [ 76%]
+tests/test_features/test_glossary_api.py::test_csv_export PASSED         [ 78%]
+tests/test_features/test_glossary_pipeline.py::TestGlossaryCorrector::test_correct_case_insensitive PASSED [ 79%]
+tests/test_features/test_glossary_pipeline.py::TestGlossaryCorrector::test_correct_preserves_non_matching_text PASSED [ 80%]
+tests/test_features/test_glossary_pipeline.py::TestGlossaryCorrector::test_correct_multiple_occurrences PASSED [ 82%]
+tests/test_features/test_glossary_pipeline.py::TestGlossaryInjector::test_build_glossary_context PASSED [ 83%]
+tests/test_features/test_glossary_pipeline.py::TestGlossaryInjector::test_inject_into_prompt PASSED [ 84%]
+tests/test_features/test_glossary_pipeline.py::TestGlossaryInjector::test_inject_empty_glossary PASSED [ 86%]
+tests/test_features/test_glossary_pipeline.py::TestGlossaryInjector::test_filter_relevant_terms PASSED [ 87%]
+tests/test_features/test_pipeline_integration.py::test_full_accuracy_pipeline PASSED [ 89%]
+tests/test_features/test_translation_memory.py::TestFuzzyMatcher::test_exact_match PASSED [ 90%]
+tests/test_features/test_translation_memory.py::TestFuzzyMatcher::test_similar_match PASSED [ 91%]
+tests/test_features/test_translation_memory.py::TestFuzzyMatcher::test_different_text PASSED [ 93%]
+tests/test_features/test_translation_memory.py::TestFuzzyMatcher::test_empty_text PASSED [ 94%]
+tests/test_features/test_translation_memory.py::TestTMStore::test_store_and_exact_lookup PASSED [ 95%]
+tests/test_features/test_translation_memory.py::TestTMStore::test_fuzzy_lookup PASSED [ 97%]
+tests/test_features/test_translation_memory.py::TestTMStore::test_fuzzy_lookup_no_match PASSED [ 98%]
+tests/test_features/test_translation_memory.py::TestTMStore::test_bulk_lookup PASSED [100%]
+
+=============================== warnings summary ===============================
+tests/test_api/test_auth.py: 2 warnings
+tests/test_api/test_preview.py: 2 warnings
+tests/test_api/test_settings.py: 2 warnings
+tests/test_api/test_subtitles.py: 2 warnings
+tests/test_api/test_tasks.py: 5 warnings
+tests/test_features/test_glossary_api.py: 7 warnings
+  /opt/homebrew/lib/python3.14/site-packages/jwt/api_jwt.py:147: InsecureKeyLengthWarning: The HMAC key is 23 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
+    return self._jws.encode(
+
+tests/test_api/test_auth.py: 1 warning
+tests/test_api/test_preview.py: 2 warnings
+tests/test_api/test_settings.py: 2 warnings
+tests/test_api/test_subtitles.py: 2 warnings
+tests/test_api/test_tasks.py: 5 warnings
+tests/test_features/test_glossary_api.py: 7 warnings
+  /opt/homebrew/lib/python3.14/site-packages/jwt/api_jwt.py:365: InsecureKeyLengthWarning: The HMAC key is 23 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
+    decoded = self.decode_complete(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 73 passed, 39 warnings in 2.09s ========================
