@@ -76,7 +76,16 @@ export const settings = {
 };
 
 export const preview = {
-  videoUrl: (taskId: number) => `${BASE_URL}/api/preview/${taskId}/video`,
-  waveformUrl: (taskId: number) => `${BASE_URL}/api/preview/${taskId}/waveform`,
-  thumbnailUrl: (taskId: number) => `${BASE_URL}/api/preview/${taskId}/thumbnail`,
+  videoUrl: (taskId: number) => {
+    const token = localStorage.getItem("token");
+    return `${BASE_URL}/api/preview/${taskId}/video${token ? `?token=${token}` : ""}`;
+  },
+  waveformUrl: (taskId: number) => {
+    const token = localStorage.getItem("token");
+    return `${BASE_URL}/api/preview/${taskId}/waveform${token ? `?token=${token}` : ""}`;
+  },
+  thumbnailUrl: (taskId: number) => {
+    const token = localStorage.getItem("token");
+    return `${BASE_URL}/api/preview/${taskId}/thumbnail${token ? `?token=${token}` : ""}`;
+  },
 };
