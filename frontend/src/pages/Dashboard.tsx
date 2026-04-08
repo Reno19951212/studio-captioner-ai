@@ -1,10 +1,13 @@
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useTaskStore } from "../store/taskStore";
 import { useQueueWebSocket } from "../hooks/useWebSocket";
 import { QueueList } from "../components/queue/QueueList";
+import type { Task } from "../types/task";
 
 export function Dashboard() {
   const { tasks, fetchTasks, fetchQueue } = useTaskStore();
+  const navigate = useNavigate();
   useQueueWebSocket();
 
   useEffect(() => { fetchTasks(); fetchQueue(); }, [fetchTasks, fetchQueue]);
@@ -13,6 +16,12 @@ export function Dashboard() {
   const processing = tasks.filter((t) => t.status === "processing");
   const review = tasks.filter((t) => t.status === "ready_for_review");
   const completed = tasks.filter((t) => t.status === "completed");
+
+  const handleTaskClick = (task: Task) => {
+    if (task.status === "ready_for_review" || task.status === "completed") {
+      navigate(`/editor/${task.id}`);
+    }
+  };
 
   return (
     <div>
@@ -37,7 +46,7 @@ export function Dashboard() {
       </div>
       {processing.length > 0 && <section className="mb-6"><h2 className="text-sm font-medium text-zinc-400 mb-2">Processing</h2><QueueList tasks={processing} /></section>}
       {queued.length > 0 && <section className="mb-6"><h2 className="text-sm font-medium text-zinc-400 mb-2">Queue</h2><QueueList tasks={queued} /></section>}
-      {review.length > 0 && <section><h2 className="text-sm font-medium text-zinc-400 mb-2">Needs Review</h2><QueueList tasks={review} /></section>}
+      {review.length > 0 && <section><h2 className="text-sm font-medium text-zinc-400 mb-2">Needs Review</h2><QueueList tasks={review} onTaskClick={handleTaskClick} /></section>}
     </div>
   );
 }
