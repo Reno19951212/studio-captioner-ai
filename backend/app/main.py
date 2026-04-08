@@ -6,7 +6,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth, tasks
+from app.api import auth, tasks, subtitles, preview
+from app.api import settings as settings_api
 from app.database import Base, async_engine
 from app.services.task_queue import TaskQueue
 from app.ws import handlers as ws_handlers
@@ -49,6 +50,9 @@ def create_app() -> FastAPI:
     )
     app.include_router(auth.router)
     app.include_router(tasks.router)
+    app.include_router(subtitles.router)
+    app.include_router(preview.router)
+    app.include_router(settings_api.router)
     app.include_router(ws_handlers.router)
 
     @app.get("/api/health")
