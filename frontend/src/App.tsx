@@ -9,6 +9,7 @@ import { GlossaryPage } from "./pages/Glossary";
 import { History } from "./pages/History";
 import { SettingsPage } from "./pages/Settings";
 import { useAuthStore } from "./store/authStore";
+import { Editor } from "./pages/Editor";
 
 export default function App() {
   const loadFromStorage = useAuthStore((s) => s.loadFromStorage);
@@ -24,6 +25,7 @@ export default function App() {
           <Route path="/glossary" element={<GlossaryPage />} />
           <Route path="/history" element={<History />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/editor/:taskId" element={<Editor />} />
         </Route>
       </Routes>
     </BrowserRouter>
