@@ -11,6 +11,7 @@ from app.api import settings as settings_api
 from app.database import Base, async_engine
 from app.services.task_queue import TaskQueue
 from app.ws import handlers as ws_handlers
+from features.glossary import api as glossary_api
 
 task_queue = TaskQueue()
 
@@ -54,6 +55,7 @@ def create_app() -> FastAPI:
     app.include_router(preview.router)
     app.include_router(settings_api.router)
     app.include_router(ws_handlers.router)
+    app.include_router(glossary_api.router)
 
     @app.get("/api/health")
     async def health():
