@@ -1,6 +1,7 @@
 """Subtitle API routes — get, save, export."""
 
 import os
+import re
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -14,6 +15,47 @@ from app.models.task import Task
 from app.models.user import User
 
 router = APIRouter(tags=["subtitles"])
+
+_SRT_TIME = re.compile(
+    r"(\d{2}):(\d{2}):(\d{1,2})[.,](\d{3})\s-->\s(\d{2}):(\d{2}):(\d{1,2})[.,](\d{3})"
+)
+
+
+def _ms(h, m, s, ms):
+    return int(h) * 3600000 + int(m) * 60000 + int(s) * 1000 + int(ms)
+
+
+def _parse_bilingual_srt(path: str) -> List["SubtitleSegment"]:
+    """Parse SRT file — automatically separates bilingual subtitles.
+
+    If a block has 2 text lines, treats line 1 as source (EN) and line 2
+    as translation (ZH). Never uses language detection.
+    """
+    with open(path, encoding="utf-8") as f:
+        content = f.read()
+
+    segments = []
+    for block in re.split(r"\n\s*\n", content.strip()):
+        lines = block.splitlines()
+        if len(lines) < 3:
+            continue
+        m = _SRT_TIME.match(lines[1])
+        if not m:
+            continue
+        start = _ms(m.group(1), m.group(2), m.group(3), m.group(4))
+        end = _ms(m.group(5), m.group(6), m.group(7), m.group(8))
+        text_lines = [l.strip() for l in lines[2:] if l.strip()]
+        if not text_lines:
+            continue
+        source = text_lines[0]
+        translation = text_lines[1] if len(text_lines) >= 2 else None
+        segments.append(SubtitleSegment(
+            text=source,
+            start_time=start,
+            end_time=end,
+            translated_text=translation,
+        ))
+    return segments
 
 
 class SubtitleSegment(BaseModel):
@@ -53,18 +95,7 @@ async def get_subtitles(
     if not task.subtitle_path or not os.path.exists(task.subtitle_path):
         raise HTTPException(status_code=404, detail="No subtitle data available")
 
-    from core.asr.asr_data import ASRData
-
-    asr_data = ASRData.from_subtitle_file(task.subtitle_path)
-    segments = [
-        SubtitleSegment(
-            text=seg.text,
-            start_time=seg.start_time,
-            end_time=seg.end_time,
-            translated_text=getattr(seg, "translated_text", None) or None,
-        )
-        for seg in asr_data.segments
-    ]
+    segments = _parse_bilingual_srt(task.subtitle_path)
     return SubtitleData(segments=segments)
 
 
