@@ -19,7 +19,7 @@ from ..subtitle.rounded_renderer import render_rounded_video
 from ..utils.logger import setup_logger
 
 if TYPE_CHECKING:
-    from videocaptioner.core.asr.asr_data import ASRData
+    from core.asr.asr_data import ASRData
 
 # FFmpeg preset 类型
 PresetType = Literal[

@@ -5,11 +5,11 @@ from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Callable, List, Optional
 
-from videocaptioner.core.asr.asr_data import ASRData, ASRDataSeg
-from videocaptioner.core.entities import SubtitleProcessData
-from videocaptioner.core.translate.types import TargetLanguage
-from videocaptioner.core.utils.cache import generate_cache_key, get_translate_cache
-from videocaptioner.core.utils.logger import setup_logger
+from core.asr.asr_data import ASRData, ASRDataSeg
+from core.entities import SubtitleProcessData
+from core.translate.types import TargetLanguage
+from core.utils.cache import generate_cache_key, get_translate_cache
+from core.utils.logger import setup_logger
 
 logger = setup_logger("subtitle_translator")
 

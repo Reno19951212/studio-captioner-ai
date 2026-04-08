@@ -1,11 +1,11 @@
-from videocaptioner.core.asr.asr_data import ASRData
-from videocaptioner.core.asr.bcut import BcutASR
-from videocaptioner.core.asr.chunked_asr import ChunkedASR
-from videocaptioner.core.asr.faster_whisper import FasterWhisperASR
-from videocaptioner.core.asr.jianying import JianYingASR
-from videocaptioner.core.asr.whisper_api import WhisperAPI
-from videocaptioner.core.asr.whisper_cpp import WhisperCppASR
-from videocaptioner.core.entities import TranscribeConfig, TranscribeModelEnum
+from core.asr.asr_data import ASRData
+from core.asr.bcut import BcutASR
+from core.asr.chunked_asr import ChunkedASR
+from core.asr.faster_whisper import FasterWhisperASR
+from core.asr.jianying import JianYingASR
+from core.asr.whisper_api import WhisperAPI
+from core.asr.whisper_cpp import WhisperCppASR
+from core.entities import TranscribeConfig, TranscribeModelEnum
 
 
 def transcribe(audio_path: str, config: TranscribeConfig, callback=None) -> ASRData:
@@ -160,7 +160,7 @@ def _create_faster_whisper_asr(audio_path: str, config: TranscribeConfig) -> Chu
 
 if __name__ == "__main__":
     # 示例用法
-    from videocaptioner.core.entities import WhisperModelEnum
+    from core.entities import WhisperModelEnum
 
     # 创建配置
     config = TranscribeConfig(

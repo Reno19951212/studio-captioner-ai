@@ -9,14 +9,14 @@ from typing import TYPE_CHECKING, Callable, Optional, Tuple
 
 from PIL import Image
 
-from videocaptioner.config import CACHE_PATH, FONTS_PATH, RESOURCE_PATH
-from videocaptioner.core.entities import SubtitleLayoutEnum
-from videocaptioner.core.utils.logger import setup_logger
+from core.config import CACHE_PATH, FONTS_PATH, RESOURCE_PATH
+from core.entities import SubtitleLayoutEnum
+from core.utils.logger import setup_logger
 
 from .ass_utils import auto_wrap_ass_file
 
 if TYPE_CHECKING:
-    from videocaptioner.core.asr.asr_data import ASRData
+    from core.asr.asr_data import ASRData
 
 logger = setup_logger("subtitle.ass")
 ASS_TEMPLATE = """[Script Info]
@@ -35,7 +35,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 
 def _check_cuda_available() -> bool:
     """检查 CUDA 是否可用"""
-    from videocaptioner.core.utils.video_utils import check_cuda_available
+    from core.utils.video_utils import check_cuda_available
     return check_cuda_available()
 
 

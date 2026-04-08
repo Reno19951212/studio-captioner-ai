@@ -4,7 +4,7 @@ from typing import Literal, Optional
 
 import openai
 
-from videocaptioner.core.llm.client import normalize_base_url
+from core.llm.client import normalize_base_url
 
 
 def check_llm_connection(

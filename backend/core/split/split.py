@@ -3,10 +3,10 @@ import difflib
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Union
 
-from videocaptioner.core.asr.asr_data import ASRData, ASRDataSeg
-from videocaptioner.core.split.split_by_llm import split_by_llm
-from videocaptioner.core.utils.logger import setup_logger
-from videocaptioner.core.utils.text_utils import (
+from core.asr.asr_data import ASRData, ASRDataSeg
+from core.split.split_by_llm import split_by_llm
+from core.utils.logger import setup_logger
+from core.utils.text_utils import (
     count_words,
     is_mainly_cjk,
     is_pure_punctuation,

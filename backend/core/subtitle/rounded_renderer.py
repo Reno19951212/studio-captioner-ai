@@ -10,15 +10,15 @@ from typing import TYPE_CHECKING, Callable, List, Optional, Tuple
 
 from PIL import Image, ImageDraw
 
-from videocaptioner.core.entities import SubtitleLayoutEnum
-from videocaptioner.core.utils.logger import setup_logger
+from core.entities import SubtitleLayoutEnum
+from core.utils.logger import setup_logger
 
 from .font_utils import FontType, get_font
 from .styles import RoundedBgStyle
 from .text_utils import hex_to_rgba, wrap_text
 
 if TYPE_CHECKING:
-    from videocaptioner.core.asr.asr_data import ASRData
+    from core.asr.asr_data import ASRData
 
 logger = setup_logger("subtitle.rounded")
 

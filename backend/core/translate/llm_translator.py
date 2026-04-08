@@ -6,11 +6,11 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 import json_repair
 import openai
 
-from videocaptioner.core.llm import call_llm
-from videocaptioner.core.prompts import get_prompt
-from videocaptioner.core.translate.base import BaseTranslator, SubtitleProcessData, logger
-from videocaptioner.core.translate.types import TargetLanguage
-from videocaptioner.core.utils.cache import generate_cache_key
+from core.llm import call_llm
+from core.prompts import get_prompt
+from core.translate.base import BaseTranslator, SubtitleProcessData, logger
+from core.translate.types import TargetLanguage
+from core.utils.cache import generate_cache_key
 
 
 class LLMTranslator(BaseTranslator):

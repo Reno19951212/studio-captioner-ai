@@ -3,7 +3,7 @@
 All提示词以 Markdown 文件形式存储，支持模板变量替换。
 
 使用示例:
-    from videocaptioner.core.prompts import get_prompt
+    from core.prompts import get_prompt
 
     # 加载提示词
     prompt = get_prompt("split/semantic")

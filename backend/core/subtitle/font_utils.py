@@ -7,8 +7,8 @@ from typing import Dict, Optional, Union
 from fontTools.ttLib import TTFont
 from PIL import ImageFont
 
-from videocaptioner.config import FONTS_PATH
-from videocaptioner.core.utils.logger import setup_logger
+from core.config import FONTS_PATH
+from core.utils.logger import setup_logger
 
 FontType = Union[ImageFont.FreeTypeFont, ImageFont.ImageFont]
 

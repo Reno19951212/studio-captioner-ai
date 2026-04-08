@@ -314,7 +314,7 @@ def available_style_names(styles_dir: Optional[Path] = None) -> List[str]:
 # ------------------------------------------------------------------ #
 
 def _default_styles_dir() -> Path:
-    from videocaptioner.config import SUBTITLE_STYLE_PATH
+    from core.config import SUBTITLE_STYLE_PATH
     return SUBTITLE_STYLE_PATH
 
 

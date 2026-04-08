@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from videocaptioner.core.entities import SubtitleLayoutEnum
+from core.entities import SubtitleLayoutEnum
 
 
 @dataclass

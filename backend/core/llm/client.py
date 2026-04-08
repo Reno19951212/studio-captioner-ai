@@ -15,8 +15,8 @@ from tenacity import (
     wait_random_exponential,
 )
 
-from videocaptioner.core.utils.cache import get_llm_cache, memoize
-from videocaptioner.core.utils.logger import setup_logger
+from core.utils.cache import get_llm_cache, memoize
+from core.utils.logger import setup_logger
 
 from .request_logger import create_logging_http_client, log_llm_response
 

@@ -7,7 +7,7 @@ import os
 import platform
 import subprocess
 
-from videocaptioner.core.entities import TranscribeModelEnum
+from core.entities import TranscribeModelEnum
 
 logger = logging.getLogger(__name__)
 

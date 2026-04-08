@@ -5,7 +5,7 @@ from enum import Enum
 from typing import TYPE_CHECKING, Literal, Optional
 
 if TYPE_CHECKING:
-    from backend.core.translate.types import TargetLanguage
+    from core.translate.types import TargetLanguage
 
 
 def _generate_task_id() -> str:

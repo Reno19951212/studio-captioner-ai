@@ -12,7 +12,7 @@ from typing import Any
 
 from diskcache import Cache
 
-from videocaptioner.config import CACHE_PATH
+from core.config import CACHE_PATH
 
 # Global cache switch
 _cache_enabled = True

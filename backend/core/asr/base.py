@@ -8,8 +8,8 @@ from typing import Callable, Optional, Union, cast
 
 from pydub import AudioSegment
 
-from videocaptioner.core.utils.cache import get_asr_cache, is_cache_enabled
-from videocaptioner.core.utils.logger import setup_logger
+from core.utils.cache import get_asr_cache, is_cache_enabled
+from core.utils.logger import setup_logger
 
 from .asr_data import ASRData, ASRDataSeg
 
