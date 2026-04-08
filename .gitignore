@@ -23,6 +23,9 @@ Thumbs.db
 output/
 temp/
 .superpowers/
+*.db
+backend/AppData/
+backend/studio_captioner.db
 
 # Node (frontend)
 node_modules/

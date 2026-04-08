@@ -31,11 +31,12 @@ export function Editor() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `subtitles.${format}`;
+      a.download = `subtitles_${taskId}.${format}`;
       a.click();
       URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error("Export failed:", err);
+      toast(`Exported subtitles_${taskId}.${format}`, "success");
+    } catch (err: unknown) {
+      toast(err instanceof Error ? err.message : "Export failed", "error");
     }
   };
 
