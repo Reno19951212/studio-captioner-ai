@@ -1,6 +1,19 @@
 import { create } from "zustand";
 import { subtitles as subtitlesApi } from "../services/api";
 import type { SubtitleSegment } from "../types/task";
+import type { SubtitleStyleConfig } from "../components/editor/StylePanel";
+
+const DEFAULT_STYLE: SubtitleStyleConfig = {
+  fontFamily: "Noto Sans SC",
+  fontSize: 24,
+  fontColor: "#ffffff",
+  outlineColor: "#000000",
+  outlineWidth: 2,
+  bgEnabled: false,
+  bgColor: "#000000",
+  bgOpacity: 0.75,
+  position: "bottom",
+};
 
 interface EditorState {
   taskId: number | null;
@@ -10,6 +23,7 @@ interface EditorState {
   isPlaying: boolean;
   isDirty: boolean;
   confidenceScores: number[];
+  subtitleStyle: SubtitleStyleConfig;
   loadSubtitles: (taskId: number) => Promise<void>;
   saveSubtitles: () => Promise<void>;
   updateSegment: (index: number, updates: Partial<SubtitleSegment>) => void;
@@ -17,6 +31,7 @@ interface EditorState {
   setCurrentTime: (ms: number) => void;
   setIsPlaying: (playing: boolean) => void;
   setConfidenceScores: (scores: number[]) => void;
+  setSubtitleStyle: (style: SubtitleStyleConfig) => void;
   getActiveSegmentIndex: () => number;
   selectNext: () => void;
   selectPrev: () => void;
@@ -30,6 +45,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   isPlaying: false,
   isDirty: false,
   confidenceScores: [],
+  subtitleStyle: DEFAULT_STYLE,
 
   loadSubtitles: async (taskId) => {
     const data = await subtitlesApi.get(taskId);
@@ -53,6 +69,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   setCurrentTime: (ms) => set({ currentTime: ms }),
   setIsPlaying: (playing) => set({ isPlaying: playing }),
   setConfidenceScores: (scores) => set({ confidenceScores: scores }),
+  setSubtitleStyle: (style) => set({ subtitleStyle: style }),
 
   getActiveSegmentIndex: () => {
     const { segments, currentTime } = get();

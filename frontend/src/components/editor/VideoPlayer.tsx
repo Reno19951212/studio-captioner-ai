@@ -6,7 +6,11 @@ interface VideoPlayerProps { taskId: number; }
 
 export function VideoPlayer({ taskId }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const { segments, currentTime, isPlaying, selectedIndex, setCurrentTime, setIsPlaying, getActiveSegmentIndex } = useEditorStore();
+  const {
+    segments, currentTime, isPlaying, selectedIndex,
+    setCurrentTime, setIsPlaying, getActiveSegmentIndex,
+    subtitleStyle: style,
+  } = useEditorStore();
 
   const activeIndex = getActiveSegmentIndex();
   const activeSegment = activeIndex >= 0 ? segments[activeIndex] : null;
@@ -44,21 +48,76 @@ export function VideoPlayer({ taskId }: VideoPlayerProps) {
     return `${String(min).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
   };
 
+  // Build subtitle overlay position class
+  const positionClass =
+    style.position === "top" ? "top-6" :
+    style.position === "middle" ? "top-1/2 -translate-y-1/2" :
+    "bottom-10";
+
+  // Build text shadow from outline settings
+  const textShadow =
+    style.outlineWidth > 0
+      ? `${style.outlineWidth}px ${style.outlineWidth}px 0 ${style.outlineColor},
+         -${style.outlineWidth}px ${style.outlineWidth}px 0 ${style.outlineColor},
+         ${style.outlineWidth}px -${style.outlineWidth}px 0 ${style.outlineColor},
+         -${style.outlineWidth}px -${style.outlineWidth}px 0 ${style.outlineColor}`
+      : undefined;
+
+  // Build background style
+  const bgStyle = style.bgEnabled
+    ? {
+        backgroundColor: style.bgColor,
+        opacity: style.bgOpacity,
+        position: "absolute" as const,
+        inset: 0,
+        borderRadius: "4px",
+      }
+    : undefined;
+
+  const subtitleTextStyle = {
+    fontFamily: style.fontFamily,
+    fontSize: `${style.fontSize}px`,
+    color: style.fontColor,
+    textShadow,
+    lineHeight: 1.4,
+  };
+
   return (
     <div className="flex flex-col bg-black rounded-lg overflow-hidden h-full">
       <div className="flex-1 relative flex items-center justify-center min-h-0">
         <video ref={videoRef} src={preview.videoUrl(taskId)} onTimeUpdate={handleTimeUpdate}
           onPlay={() => setIsPlaying(true)} onPause={() => setIsPlaying(false)}
           className="max-w-full max-h-full object-contain" preload="metadata" />
+
         {activeSegment && (
-          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 max-w-[80%] text-center">
+          <div className={`absolute left-1/2 -translate-x-1/2 max-w-[85%] text-center ${positionClass}`}>
+            {/* Primary line: translated text (if exists) */}
             {activeSegment.translated_text && (
-              <div className="bg-black/75 px-4 py-1 rounded text-white text-base mb-1">{activeSegment.translated_text}</div>
+              <div className="relative inline-block mb-1 px-3 py-0.5 rounded">
+                {bgStyle && <div style={bgStyle} />}
+                <span className="relative" style={subtitleTextStyle}>
+                  {activeSegment.translated_text}
+                </span>
+              </div>
             )}
-            <div className="bg-black/60 px-4 py-1 rounded text-zinc-300 text-sm">{activeSegment.text}</div>
+            {/* Secondary line: source text (smaller, dimmer) */}
+            <div className="relative inline-block px-2 py-0.5 rounded">
+              {bgStyle && <div style={{ ...bgStyle, opacity: (style.bgOpacity ?? 0.75) * 0.7 }} />}
+              <span
+                className="relative"
+                style={{
+                  ...subtitleTextStyle,
+                  fontSize: `${Math.max(12, style.fontSize - 4)}px`,
+                  color: style.fontColor + "cc",
+                }}
+              >
+                {activeSegment.text}
+              </span>
+            </div>
           </div>
         )}
       </div>
+
       <div className="flex items-center justify-center gap-4 py-2 bg-zinc-900/80">
         <span className="text-xs text-zinc-500 w-12 text-right">{formatTime(currentTime)}</span>
         <button onClick={togglePlay} className="text-white hover:text-blue-400 text-lg w-8 text-center">
