@@ -231,3 +231,50 @@ async def synthesize_video(
             await sess.commit()
 
     return {"output_path": out_path, "detail": "Synthesis complete"}
+
+
+class TranslateSegmentRequest(BaseModel):
+    text: str
+
+
+@router.post("/api/tasks/{task_id}/translate-segment")
+async def translate_segment(
+    task_id: int,
+    body: TranslateSegmentRequest,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Translate a single subtitle segment on demand using the configured LLM."""
+    await _get_user_task(task_id, user, db)  # auth check
+
+    from app.config import settings as app_settings
+    import openai
+
+    client = openai.OpenAI(
+        api_key=app_settings.llm_api_key,
+        base_url=app_settings.llm_api_base,
+    )
+    try:
+        resp = client.chat.completions.create(
+            model=app_settings.llm_model,
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a professional subtitle translator specialising in Traditional Chinese (繁體中文) "
+                        "used in Hong Kong and Taiwan. Translate the given English subtitle text to Traditional Chinese. "
+                        "Rules: 1. Traditional Chinese ONLY — no simplified. "
+                        "2. Return ONLY the translated text. "
+                        "3. Keep proper nouns (names, brands) in English when no standard Chinese equivalent exists. "
+                        "4. Be concise — match subtitle length."
+                    ),
+                },
+                {"role": "user", "content": body.text},
+            ],
+            temperature=0.3,
+        )
+        translation = resp.choices[0].message.content.strip()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Translation failed: {str(e)}")
+
+    return {"translated_text": translation}

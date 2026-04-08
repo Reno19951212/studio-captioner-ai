@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useEditorStore } from "../../store/editorStore";
 
 const CONFIDENCE_THRESHOLD = 0.9;
@@ -13,8 +13,31 @@ function formatTimecode(ms: number): string {
 }
 
 export function SubtitleList() {
-  const { segments, selectedIndex, confidenceScores, selectSegment, updateSegment } = useEditorStore();
+  const { segments, selectedIndex, confidenceScores, selectSegment, updateSegment, taskId } = useEditorStore();
   const listRef = useRef<HTMLDivElement>(null);
+  const [translating, setTranslating] = useState<number | null>(null);
+
+  const retranslate = async (i: number, text: string) => {
+    if (!taskId || !text.trim()) return;
+    setTranslating(i);
+    try {
+      const token = localStorage.getItem("token");
+      const resp = await fetch(`http://localhost:8000/api/tasks/${taskId}/translate-segment`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ text }),
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        updateSegment(i, { translated_text: data.translated_text });
+      }
+    } finally {
+      setTranslating(null);
+    }
+  };
 
   useEffect(() => {
     if (selectedIndex === null || !listRef.current) return;
@@ -61,18 +84,26 @@ export function SubtitleList() {
               <div className="text-zinc-200 mb-1 text-sm">{seg.text || <span className="text-zinc-600 italic">empty</span>}</div>
             )}
             {isSelected ? (
-              <textarea
-                value={seg.translated_text || ""}
-                onChange={(e) => updateSegment(i, { translated_text: e.target.value })}
-                onKeyDown={(e) => {
-                  if (e.key === "Escape") { e.preventDefault(); selectSegment(null); }
-                  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); selectSegment(i + 1 < segments.length ? i + 1 : null); }
-                }}
-                className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-blue-400 text-sm resize-none focus:border-blue-500 focus:outline-none"
-                rows={2}
-                placeholder="Translation… (Enter = next, Shift+Enter = new line, Esc = close)"
-                onClick={(e) => e.stopPropagation()}
-              />
+              <div onClick={(e) => e.stopPropagation()}>
+                <textarea
+                  value={seg.translated_text || ""}
+                  onChange={(e) => updateSegment(i, { translated_text: e.target.value })}
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape") { e.preventDefault(); selectSegment(null); }
+                    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); selectSegment(i + 1 < segments.length ? i + 1 : null); }
+                  }}
+                  className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-blue-400 text-sm resize-none focus:border-blue-500 focus:outline-none"
+                  rows={2}
+                  placeholder="Translation… (Enter = next, Shift+Enter = new line, Esc = close)"
+                />
+                <button
+                  onClick={() => retranslate(i, seg.text)}
+                  disabled={translating === i}
+                  className="mt-1 text-xs text-zinc-500 hover:text-purple-400 disabled:text-zinc-700"
+                >
+                  {translating === i ? "Translating…" : "↻ Re-translate"}
+                </button>
+              </div>
             ) : (
               <div className={`text-sm ${isLowConfidence ? "text-red-400" : "text-blue-400"}`}>
                 {seg.translated_text || <span className="text-zinc-600 italic">no translation</span>}

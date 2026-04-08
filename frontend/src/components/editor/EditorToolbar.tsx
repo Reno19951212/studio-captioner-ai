@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useEditorStore } from "../../store/editorStore";
+import { toast } from "../common/Toast";
 
 interface EditorToolbarProps {
   onExport?: (format: string) => void;
@@ -30,7 +31,10 @@ export function EditorToolbar({ onExport, onSynthesize }: EditorToolbarProps) {
       </div>
       <div className="flex gap-2 items-center">
         <button
-          onClick={() => saveSubtitles()}
+          onClick={async () => {
+            await saveSubtitles();
+            toast("Subtitles saved", "success");
+          }}
           disabled={!isDirty}
           className="bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-700 disabled:text-zinc-500 text-white text-sm px-3 py-1 rounded"
         >

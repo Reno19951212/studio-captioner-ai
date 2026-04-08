@@ -8,6 +8,7 @@ import { StylePanel } from "../components/editor/StylePanel";
 import { EditorToolbar } from "../components/editor/EditorToolbar";
 import { useEditorKeyboard } from "../hooks/useEditorKeyboard";
 import { subtitles as subtitlesApi } from "../services/api";
+import { toast } from "../components/common/Toast";
 
 type EditorTab = "subtitles" | "style";
 
@@ -51,8 +52,11 @@ export function Editor() {
     });
     if (!resp.ok) {
       const err = await resp.json().catch(() => ({}));
+      toast(err.detail || "Synthesis failed", "error");
       throw new Error(err.detail || "Synthesis failed");
     }
+    const data = await resp.json();
+    toast(`Burn complete → ${data.output_path?.split("/").pop() ?? format}`, "success");
   };
 
   if (!taskId) return <p className="text-zinc-500">Invalid task ID</p>;

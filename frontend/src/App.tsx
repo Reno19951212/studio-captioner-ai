@@ -10,6 +10,7 @@ import { History } from "./pages/History";
 import { SettingsPage } from "./pages/Settings";
 import { useAuthStore } from "./store/authStore";
 import { Editor } from "./pages/Editor";
+import { ToastContainer } from "./components/common/Toast";
 
 export default function App() {
   const loadFromStorage = useAuthStore((s) => s.loadFromStorage);
@@ -17,6 +18,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
+      <ToastContainer />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
