@@ -50,6 +50,19 @@ export const subtitles = {
     request<{ detail: string }>(`/api/tasks/${taskId}/subtitles`, {
       method: "PUT", body: JSON.stringify({ segments }),
     }),
+  exportUrl: (taskId: number, format: string) => {
+    const token = localStorage.getItem("token");
+    return `${BASE_URL}/api/tasks/${taskId}/export?format=${format}${token ? `&token=${token}` : ""}`;
+  },
+  exportPost: async (taskId: number, format: string): Promise<Blob> => {
+    const resp = await fetch(`${BASE_URL}/api/tasks/${taskId}/export`, {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify({ format }),
+    });
+    if (!resp.ok) throw new Error("Export failed");
+    return resp.blob();
+  },
 };
 
 export const glossaries = {

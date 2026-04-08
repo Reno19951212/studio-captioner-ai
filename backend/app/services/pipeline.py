@@ -117,9 +117,13 @@ async def run_pipeline(task_id: int, progress_callback: Optional[Callable] = Non
                         {
                             "role": "system",
                             "content": (
-                                "You are a professional subtitle translator. "
-                                "Translate the given English text to Traditional Chinese (繁體中文). "
-                                "Return ONLY the translated text, no explanations, no punctuation changes beyond what is natural."
+                                "You are a professional subtitle translator specialising in Traditional Chinese (繁體中文) used in Hong Kong and Taiwan. "
+                                "Translate the given English subtitle text to Traditional Chinese. "
+                                "Rules: "
+                                "1. Use Traditional Chinese characters ONLY — never simplified Chinese. "
+                                "2. Return ONLY the translated text with no explanation, no English, no notes. "
+                                "3. Keep proper nouns (names, brands) in English if there is no standard Chinese equivalent. "
+                                "4. Match subtitle length — be concise."
                             ),
                         },
                         {"role": "user", "content": seg.text},

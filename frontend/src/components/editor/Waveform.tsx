@@ -55,7 +55,7 @@ export function Waveform({ taskId }: WaveformProps) {
         start: seg.start_time / 1000,
         end: seg.end_time / 1000,
         color: isSelected ? "rgba(96, 165, 250, 0.2)" : isLow ? "rgba(248, 113, 113, 0.15)" : "rgba(52, 211, 153, 0.1)",
-        drag: false,
+        drag: true,
         resize: true,
         id: `seg-${i}`,
       });

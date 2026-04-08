@@ -7,6 +7,7 @@ import { Waveform } from "../components/editor/Waveform";
 import { StylePanel } from "../components/editor/StylePanel";
 import { EditorToolbar } from "../components/editor/EditorToolbar";
 import { useEditorKeyboard } from "../hooks/useEditorKeyboard";
+import { subtitles as subtitlesApi } from "../services/api";
 
 type EditorTab = "subtitles" | "style";
 
@@ -22,11 +23,26 @@ export function Editor() {
     if (taskId) loadSubtitles(taskId);
   }, [taskId, loadSubtitles]);
 
+  const handleExport = async (format: string) => {
+    if (!taskId) return;
+    try {
+      const blob = await subtitlesApi.exportPost(taskId, format);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `subtitles.${format}`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Export failed:", err);
+    }
+  };
+
   if (!taskId) return <p className="text-zinc-500">Invalid task ID</p>;
 
   return (
     <div className="flex flex-col h-full -m-6">
-      <EditorToolbar />
+      <EditorToolbar onExport={handleExport} />
       <div className="flex flex-1 min-h-0">
         <div className="flex-1 min-w-0">
           <VideoPlayer taskId={taskId} />
